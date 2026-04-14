@@ -10,6 +10,10 @@ import { TOUZI_QUESTIONS, TOUZI_PERSONALITIES, TOUZI_DIMENSIONS, findTouziBest }
 import { KUIQIAN_QUESTIONS, KUIQIAN_PERSONALITIES, KUIQIAN_DIMENSIONS, findKuiqianBest } from './data/kuiqian';
 import { NUMA_QUESTIONS, NUMA_PERSONALITIES, NUMA_DIMENSIONS, findNumaBest } from './data/niuma';
 import { FOOD_QUESTIONS, FOOD_PERSONALITIES, FOOD_DIMENSIONS, findFoodBest } from './data/food';
+import { KPITI_QUESTIONS, KPITI_PERSONALITIES, KPITI_DIMENSIONS, findKpitiBest } from './data/kpiti';
+import { WUXING_QUESTIONS, WUXING_PERSONALITIES, WUXING_DIMENSIONS, findWuxingBest } from './data/wuxing';
+import { LOVETI_QUESTIONS, LOVETI_PERSONALITIES, LOVETI_DIMENSIONS, findLovetiBest } from './data/loveti';
+import { STEAMTI_QUESTIONS, STEAMTI_PERSONALITIES, STEAMTI_DIMENSIONS, findSteamtiBest } from './data/steamti';
 
 // ── Button ─────────────────────────────────────────────────
 
@@ -49,6 +53,84 @@ const Button = ({
   );
 };
 
+// ── Themed Landing Page ─────────────────────────────────────
+
+function ThemedLandingPage({ theme, quizPath }: { theme: ThemeConfig; quizPath: string }) {
+  const accentStyle = {
+    backgroundColor: theme.accent + '30',
+    borderColor: theme.accent,
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6 font-sans selection:bg-lime-400">
+
+      {/* Decorative elements */}
+      <div
+        className="absolute top-10 left-10 w-20 h-20 border-4 border-black rounded-full opacity-10 animate-pulse"
+        style={{ borderColor: theme.accent }}
+      />
+      <div
+        className="absolute bottom-10 right-10 w-32 h-32 border-4 border-black rotate-45 opacity-10"
+        style={{ borderColor: theme.accent }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-2xl w-full text-center space-y-8"
+      >
+        <div className="space-y-2">
+          <motion.h1
+            className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none font-display"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+          >
+            <span style={{ color: theme.accent }}>{theme.emoji}</span>
+            <br />
+            <span
+              className="px-4 inline-block transform -rotate-2 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+              style={{ backgroundColor: theme.accent + '60' }}
+            >
+              {theme.subtitle}
+            </span>
+          </motion.h1>
+          <p className="text-xl md:text-2xl font-bold mt-8 text-zinc-600">
+            {theme.description}
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center gap-6">
+          <Link to={quizPath}>
+            <Button onClick={() => {}} variant="secondary" className="text-2xl px-12 py-6">
+              开始测试 <ArrowRight className="w-8 h-8" />
+            </Button>
+          </Link>
+
+          <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium uppercase tracking-widest">
+            <AlertCircle className="w-4 h-4" />
+            免责声明: 仅供娱乐 请勿当真
+          </div>
+        </div>
+
+        {/* Back to home */}
+        <Link to="/" className="inline-block mt-4 text-sm text-zinc-400 hover:text-black transition-colors">
+          ← 返回首页
+        </Link>
+      </motion.div>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-12 text-xs opacity-20 font-black tracking-widest"
+      >
+        VIBE LAB · {theme.name.toUpperCase()}
+      </motion.p>
+    </div>
+  );
+}
+
 // ── Theme Pages ─────────────────────────────────────────────
 
 function ThemePage({ theme, questions, personalities, dimensions, computeBestMatch }: {
@@ -65,13 +147,21 @@ function ThemePage({ theme, questions, personalities, dimensions, computeBestMat
   };
 
   if (result) {
+    // Aggregate answers into dimension scores
+    const dimScores: Record<string, number> = {};
+    questions.forEach((q: any) => {
+      const val = result.answers[q.id] ?? 0;
+      if (!dimScores[q.dim]) dimScores[q.dim] = 0;
+      dimScores[q.dim] += val;
+    });
+
     return (
       <ResultCard
         personality={result.personality}
         similarity={result.similarity}
         theme={theme}
         onRestart={() => setResult(null)}
-        dimensionScores={result.answers}
+        dimensionScores={dimScores}
         dimensions={dimensions}
       />
     );
@@ -197,6 +287,15 @@ const router = createBrowserRouter([
   {
     path: '/sbti',
     element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'sbti')!}
+        quizPath="/sbti/quiz"
+      />
+    ),
+  },
+  {
+    path: '/sbti/quiz',
+    element: (
       <ThemePage
         theme={THEMES.find(t => t.id === 'sbti')!}
         questions={SBTI_QUESTIONS}
@@ -208,6 +307,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/touzi',
+    element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'touzi')!}
+        quizPath="/touzi/quiz"
+      />
+    ),
+  },
+  {
+    path: '/touzi/quiz',
     element: (
       <ThemePage
         theme={THEMES.find(t => t.id === 'touzi')!}
@@ -221,6 +329,15 @@ const router = createBrowserRouter([
   {
     path: '/kuiqian',
     element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'kuiqian')!}
+        quizPath="/kuiqian/quiz"
+      />
+    ),
+  },
+  {
+    path: '/kuiqian/quiz',
+    element: (
       <ThemePage
         theme={THEMES.find(t => t.id === 'kuiqian')!}
         questions={KUIQIAN_QUESTIONS}
@@ -232,6 +349,15 @@ const router = createBrowserRouter([
   },
   {
     path: '/niuma',
+    element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'niuma')!}
+        quizPath="/niuma/quiz"
+      />
+    ),
+  },
+  {
+    path: '/niuma/quiz',
     element: (
       <ThemePage
         theme={THEMES.find(t => t.id === 'niuma')!}
@@ -245,12 +371,105 @@ const router = createBrowserRouter([
   {
     path: '/food',
     element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'food')!}
+        quizPath="/food/quiz"
+      />
+    ),
+  },
+  {
+    path: '/food/quiz',
+    element: (
       <ThemePage
         theme={THEMES.find(t => t.id === 'food')!}
         questions={FOOD_QUESTIONS}
         personalities={FOOD_PERSONALITIES}
         dimensions={FOOD_DIMENSIONS}
         computeBestMatch={findFoodBest}
+      />
+    ),
+  },
+  {
+    path: '/kpiti',
+    element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'kpiti')!}
+        quizPath="/kpiti/quiz"
+      />
+    ),
+  },
+  {
+    path: '/kpiti/quiz',
+    element: (
+      <ThemePage
+        theme={THEMES.find(t => t.id === 'kpiti')!}
+        questions={KPITI_QUESTIONS}
+        personalities={KPITI_PERSONALITIES}
+        dimensions={KPITI_DIMENSIONS}
+        computeBestMatch={findKpitiBest}
+      />
+    ),
+  },
+  {
+    path: '/wuxing',
+    element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'wuxing')!}
+        quizPath="/wuxing/quiz"
+      />
+    ),
+  },
+  {
+    path: '/wuxing/quiz',
+    element: (
+      <ThemePage
+        theme={THEMES.find(t => t.id === 'wuxing')!}
+        questions={WUXING_QUESTIONS}
+        personalities={WUXING_PERSONALITIES}
+        dimensions={WUXING_DIMENSIONS}
+        computeBestMatch={findWuxingBest}
+      />
+    ),
+  },
+  {
+    path: '/loveti',
+    element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'loveti')!}
+        quizPath="/loveti/quiz"
+      />
+    ),
+  },
+  {
+    path: '/loveti/quiz',
+    element: (
+      <ThemePage
+        theme={THEMES.find(t => t.id === 'loveti')!}
+        questions={LOVETI_QUESTIONS}
+        personalities={LOVETI_PERSONALITIES}
+        dimensions={LOVETI_DIMENSIONS}
+        computeBestMatch={findLovetiBest}
+      />
+    ),
+  },
+  {
+    path: '/steamti',
+    element: (
+      <ThemedLandingPage
+        theme={THEMES.find(t => t.id === 'steamti')!}
+        quizPath="/steamti/quiz"
+      />
+    ),
+  },
+  {
+    path: '/steamti/quiz',
+    element: (
+      <ThemePage
+        theme={THEMES.find(t => t.id === 'steamti')!}
+        questions={STEAMTI_QUESTIONS}
+        personalities={STEAMTI_PERSONALITIES}
+        dimensions={STEAMTI_DIMENSIONS}
+        computeBestMatch={findSteamtiBest}
       />
     ),
   },
